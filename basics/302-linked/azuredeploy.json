@@ -1,0 +1,94 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "apiProfile": "2018-03-01-hybrid",
+  "parameters": {    
+    "appname": {
+      "type": "String"
+    },
+    "storageAccountName": {
+      "type": "String"
+    },
+    "resourceGroupBase": {
+      "type": "String",
+      "defaultValue": "BaseRG"
+    }
+  },
+  "variables": {
+    "resourceGroupStorage": "[concat(parameters('resourceGroupBase'), '-storage')]",
+    "resourceGroupWebapp": "[concat(parameters('resourceGroupBase'), '-webapp')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/resourceGroups",
+      "apiVersion": "2018-05-01",
+      "name": "[variables('resourceGroupStorage')]",
+      "location": "westeurope",
+      "properties": {}
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2018-05-01",
+      "name": "storage",
+      "resourceGroup": "[variables('resourceGroupStorage')]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "https://raw.githubusercontent.com/xanderv87/ARM-Meetup/master/basics/102-create-storage-account/azuredeploy.json",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "storageAccountName": {
+            "value": "[parameters('storageAccountName')]"
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupStorage'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/resourceGroups",
+      "apiVersion": "2018-05-01",
+      "name": "[variables('resourceGroupWebapp')]",
+      "location": "westeurope",
+      "properties": {}
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2018-05-01",
+      "name": "webapp",
+      "resourceGroup": "[variables('resourceGroupWebapp')]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "https://raw.githubusercontent.com/xanderv87/ARM-Meetup/master/basics/202-webapp/azuredeploy.json",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "appname": {
+            "value": "[parameters('appname')]"
+          },
+          "hostingPlanName": {
+            "value": "[parameters('appname')]"
+          },
+          "location": {
+            "value": "westeurope"
+          },
+          "sku": {
+            "value": "Shared"
+          },
+          "skuCode": {
+            "value": "F1"
+          },
+          "storageAccount": {
+            "value": "[reference(concat('Microsoft.Resources/deployments/', 'storage')).outputs.StorageAccountConnectionString.value]"
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupWebapp'))]"
+      ]
+    }
+  ]
+}
