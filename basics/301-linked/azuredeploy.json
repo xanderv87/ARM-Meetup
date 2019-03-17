@@ -1,0 +1,64 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "apiProfile": "2018-03-01-hybrid",
+  "parameters": {    
+    "appname": {
+      "type": "String"
+    },
+    "storageAccountName": {
+      "type": "String"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2018-05-01",
+      "name": "storage",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "https://raw.githubusercontent.com/xanderv87/ARM-Meetup/master/basics/102-create-storage-account/azuredeploy.json",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "storageAccountName": {
+            "value": "[parameters('storageAccountName')]"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2018-05-01",
+      "name": "webapp",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "https://raw.githubusercontent.com/xanderv87/ARM-Meetup/master/basics/202-webapp/azuredeploy.json",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "appname": {
+            "value": "[parameters('appname')]"
+          },
+          "hostingPlanName": {
+            "value": "[parameters('appname')]"
+          },
+          "location": {
+            "value": "[resourceGroup().location]"
+          },
+          "sku": {
+            "value": "Shared"
+          },
+          "skuCode": {
+            "value": "F1"
+          },
+          "storageAccount": {
+            "value": "[reference(concat('Microsoft.Resources/deployments/', 'storage')).outputs.StorageAccountConnectionString.value]"
+          }
+        }
+      }
+    }
+  ]
+}

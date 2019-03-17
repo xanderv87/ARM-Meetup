@@ -1,0 +1,21 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "appname": {
+            "value": "xyz-arm-meetup-test-1"
+        },
+        "hostingPlanName": {
+            "value": "xyz-arm-meetup-test-1"
+        },
+        "location": {
+            "value": "westeurope"
+        },
+        "sku": {
+            "value": "Shared"
+        },
+        "skuCode": {
+            "value": "F1"
+        }
+    }
+}
